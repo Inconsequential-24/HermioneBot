@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 model_name = "meta-llama/Llama-2-7b-chat-hf"  
 
 # HFtoken
-token = "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"  
+token = "-----"  
 
 # Load the model and tokenizer 
 tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=token)
