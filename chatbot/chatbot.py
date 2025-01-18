@@ -1,15 +1,17 @@
-
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
-# Use the publicly available LLAMA model
-model_name = "meta-llama/Llama-2-7b-chat-hf"  # Publicly available model
+# LLAMA model
+model_name = "meta-llama/Llama-2-7b-chat-hf"  
 
-# Load the model and tokenizer
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
+# HFtoken
+token = "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"  
 
-# Create a text-generation pipeline
-chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer)
+# Load the model and tokenizer 
+tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=token)
+model = AutoModelForCausalLM.from_pretrained(model_name, use_auth_token=token)
+
+#text-generation pipeline
+chatbot = pipeline("text-generation", model=model, tokenizer=tokenizer, device=0)  # Set device=0 for GPU, if available
 
 class Memory:
     def __init__(self, memory_limit=5):
@@ -33,19 +35,14 @@ class HermioneChatbot:
         self.memory = Memory()  # Initialize memory system
 
     def get_response(self, user_input):
-        # Get recent memory context (conversation history)
         memory_context = self.memory.get_memory()
 
-        # Add the new user input to the conversation context
         prompt = f"{memory_context}\nUser: {user_input}\nHermione:"
 
-        # Generate a response using the LLAMA model
-        response = chatbot(prompt, max_length=150)
-
-        # Extract the bot's response (after "Hermione:")
+        response = chatbot(prompt, truncation=False, pad_token_id=tokenizer.eos_token_id, max_length=2048)  
+        
         bot_response = response[0]['generated_text'].split("Hermione:")[-1].strip()
 
-        # Store the conversation in memory
         self.memory.remember(user_input, bot_response)
 
         return bot_response
